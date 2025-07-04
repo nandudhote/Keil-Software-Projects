@@ -1,0 +1,211 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 11:40:40 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Nandkishor\Software\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(..\N76E003_BSP_Keil_C
+                    -51_V1.0.6;..\..\N76E003_BSP_Keil_C51_V1.0.6\N76E003_BSP_Keil_C51_V1.0.6\Include;..\..\N76E003_BSP_Keil_C51_V1.0.6\N76E00
+                    -3_BSP_Keil_C51_V1.0.6\Common) DEBUG OBJECTEXTEND PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "N76E003.h"
+   2          #include "Common.h"
+   3          #include "Delay.h"
+   4          #include "SFR_Macro.h"
+   5          #include "Function_define.h"
+   6          //#include "stdint.h" // for uint16_t
+   7          
+   8          
+   9          // i2c variable start //
+  10          #define I2C_CLOCK            13
+  11          #define EEPROM_SLA           0x15  //0x15 //0x20  //0xA4 
+  12          
+  13          void Init_I2C(void);
+  14          
+  15          uint8_t data_received[10];
+  16          uint8_t data_num = 0;
+  17          uint16_t finalADCAVG = 1234;
+  18          
+  19          volatile bit data_ready = 0;
+  20          uint8_t data_len = 0;
+  21          
+  22          // define string
+  23          uint8_t data_to_send[] = "HELLO Evoluzn India";
+  24          uint8_t send_index = 0;
+  25          uint8_t send_len = sizeof(data_to_send) - 1; // minus 1 to remove null terminator
+  26          
+  27          
+  28          uint8_t i;
+  29          
+  30          /*==========================================================================*/
+  31          void main (void) 
+  32          {
+  33   1           // Initialize UART0 using Timer1, baud rate 9600
+  34   1           InitialUART0_Timer3(9600);
+  35   1        
+  36   1           TI_1 = 1;
+  37   1           // Enable_ADC_AIN1;            // Enable AIN1 P3.0 as ADC input, Find in "Function_define.h" - "ADC INIT"
+  38   1        
+  39   1        /* Initial I2C function */
+  40   1           Init_I2C();                                 //initial I2C circuit
+  41   1      
+  42   1          /*while(1)
+  43   1          {
+  44   1            adcval = 0;
+  45   1            for(a=0; a<CTSampleSize; a++){
+  46   1              clr_ADCF;
+  47   1              set_ADCS;                 // ADC start trig signal
+  48   1              while(ADCF == 0);
+  49   1              adcval = ADCRH;
+  50   1              adcval = adcval << 4;
+  51   1              adcval |= (ADCRL & 0x0f);
+  52   1              CT[a] = adcval;
+  53   1              Timer0_Delay1ms(2);
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 11:40:40 PAGE 2   
+
+  54   1            }
+  55   1            adcAvg = (adcAvg + findMax(CT, CTSampleSize));
+  56   1            sampleCounter++;
+  57   1            if(sampleCounter >= avgSamples){
+  58   1              Timer0_Delay1ms(20);
+  59   1              sampleCounter = 0;
+  60   1              finalADCAVG = (uint16_t)adcAvg/avgSamples;
+  61   1              adcAvg = 0;
+  62   1            } 
+  63   1        }*/
+  64   1        
+  65   1      while (1)
+  66   1      {
+  67   2        if (data_ready)
+  68   2          {
+  69   3              printf("\nReceived string: ");
+  70   3      
+  71   3              for (i=0; i<data_len; i++)
+  72   3              {
+  73   4                  printf("%c", data_received[i]);
+  74   4              }
+  75   3              printf("\n");
+  76   3              data_ready = 0;   // clear flag
+  77   3          }
+  78   2          //Timer0_Delay1ms(300);
+  79   2          Timer0_Delay1ms(100);
+  80   2       }
+  81   1      }
+  82          
+  83          
+  84          void Init_I2C(void)
+  85          {
+  86   1          P13_Quasi_Mode;                         //set SCL (P13) is Quasi mode
+  87   1          P14_Quasi_Mode;                         //set SDA (P14) is Quasi mode
+  88   1          
+  89   1          SDA = 1;                                //set SDA and SCL pins high
+  90   1          SCL = 1;
+  91   1          
+  92   1          set_P0SR_6;                             //set SCL (P06) is  Schmitt triggered input select.
+  93   1          
+  94   1          set_EI2C;                               //enable I2C interrupt by setting IE1 bit 0
+  95   1          set_EA;
+  96   1      
+  97   1          I2ADDR = EEPROM_SLA;                    //define own slave address
+  98   1          set_I2CEN;                              //enable I2C circuit
+  99   1          set_AA;
+ 100   1      }
+ 101          
+ 102          void I2C_ISR(void) interrupt 6
+ 103          {
+ 104   1          //printf("\n i2c interrupt happend %x", I2STAT);
+ 105   1          switch (I2STAT)
+ 106   1          {
+ 107   2              case 0x00:
+ 108   2                  STO = 1;
+ 109   2                  break;
+ 110   2      
+ 111   2              case 0x60:
+ 112   2                  AA = 1;
+ 113   2                  //P3 = 0x60;
+ 114   2                  //printf("\ncase 0x60");
+ 115   2                  //data_received[data_num] = I2DAT;
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 11:40:40 PAGE 3   
+
+ 116   2                  //printf("\ndata receive inb 0x60 : %x", data_received[data_num]);
+ 117   2                  break;
+ 118   2              
+ 119   2              case 0x68:
+ 120   2                  P02 = 0;
+ 121   2                  while(1);
+ 122   2                  break;
+ 123   2      
+ 124   2              case 0x80:
+ 125   2                  P3 = 0x80;        
+ 126   2                  data_received[data_num] = I2DAT;
+ 127   2                  data_num++;
+ 128   2                  if (data_num >= sizeof(data_received))
+ 129   2                    {
+ 130   3                       data_ready = 1;   // buffer full, process in main
+ 131   3                       data_num = 0;     // reset index for next string
+ 132   3                    }
+ 133   2                    AA = 1;               // acknowledge to continue receiving  
+ 134   2                  break;
+ 135   2      
+ 136   2              case 0x88:
+ 137   2                  //P3 = 0x88;
+ 138   2                  //data_received[data_num] = I2DAT;
+ 139   2                  //data_num = 0;
+ 140   2                  AA = 1;
+ 141   2                  break;
+ 142   2      
+ 143   2              case 0xA0:
+ 144   2                  //P3 = 0xA0;
+ 145   2                  data_len = data_num;    // store length of received string
+ 146   2                  data_ready = 1;         // flag main loop to process
+ 147   2                  data_num = 0;           // reset index
+ 148   2                  AA = 1;
+ 149   2                  break;
+ 150   2              
+ 151   2              case 0xA8:  // Master starts reading ? first byte
+ 152   2                  printf("\nMaster started read, sending: %c", data_to_send[0]);
+ 153   2                  send_index = 0;
+ 154   2                  I2DAT = data_to_send[send_index++];
+ 155   2                  AA = 1;
+ 156   2                  break;
+ 157   2      
+ 158   2              case 0xB8:  // Master ACKed, send next byte
+ 159   2                  if (send_index < send_len) {
+ 160   3                  printf("\nSending: %c", data_to_send[send_index]);
+ 161   3                  I2DAT = data_to_send[send_index++];
+ 162   3                  AA = 1;
+ 163   3                  } else {
+ 164   3                  printf("\nAll data sent");
+ 165   3                  AA = 0;
+ 166   3                  }
+ 167   2                  break;
+ 168   2      
+ 169   2              case 0xC0:  // Master NACKed, stop
+ 170   2                  AA = 1;
+ 171   2                  break;
+ 172   2      
+ 173   2              case 0xC8:
+ 174   2                  //P3 = 0xC8;
+ 175   2                  AA = 1;
+ 176   2                  break;        
+ 177   2          }
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 11:40:40 PAGE 4   
+
+ 178   1          SI = 0;
+ 179   1          // while(STO);
+ 180   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    360    ----
+   CONSTANT SIZE    =     86    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     37    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

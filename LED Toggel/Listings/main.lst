@@ -1,0 +1,95 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 12:01:42 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Nandkishor\Software\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(..\N76E003_BSP_Keil_C
+                    -51_V1.0.6;..\N76E003_BSP_Keil_C51_V1.0.6\N76E003_BSP_Keil_C51_V1.0.6\Common;..\N76E003_BSP_Keil_C51_V1.0.6\N76E003_BSP_K
+                    -eil_C51_V1.0.6\Include) DEBUG OBJECTEXTEND PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "N76E003.h"
+   2          #include "SFR_Macro.h"
+   3          #include "Function_define.h"
+   4          #include "Common.h"
+   5          #include "Delay.h"
+   6          
+   7          //==========================================================================
+   8          // MAIN FUNCTION
+   9          //==========================================================================
+  10          void main(void)
+  11          {
+  12   1          //char oper;   // Variable to store received character
+  13   1      
+  14   1          // Initialize UART0 using Timer1, baud rate 9600
+  15   1           InitialUART0_Timer3(9600);
+  16   1      
+  17   1          TI = 1;  // Enable transmit interrupt flag, required before first printf
+  18   1        
+  19   1          P12_PushPull_Mode;   // sets P1.2 to push-pull mode (output)
+  20   1      
+  21   1      
+  22   1          // Send an initial message
+  23   1          //printf("Hello CircuitDigest\r\n");
+  24   1          printf("Hello CircuitDigest");
+  25   1        
+  26   1        
+  27   1      while (1)
+  28   1      {
+  29   2          P12 = 1;              // LED ON
+  30   2          Timer0_Delay1ms(1000); // delay 500ms
+  31   2      
+  32   2          P12 = 0;              // LED OFF
+  33   2          Timer0_Delay1ms(1000); // delay 500ms
+  34   2      
+  35   2          /*printf("\r\nPress 1 or Press 2 or Press 3 or Press 4");
+  36   2      
+  37   2          while (1)
+  38   2          {
+  39   2              oper = Receive_Data_From_UART0();
+  40   2      
+  41   2              // skip \r and \n silently
+  42   2              if (oper != '\r' && oper != '\n')
+  43   2                  break;
+  44   2          }
+  45   2              // Print what was received
+  46   2              printf("\r\nYou pressed: %c", oper);
+  47   2          
+  48   2          switch (oper)
+  49   2          {
+  50   2              case '1':
+  51   2                  printf("\r\n1 is pressed");
+  52   2                  break;
+  53   2              case '2':
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 12:01:42 PAGE 2   
+
+  54   2                  printf("\r\n2 is pressed");
+  55   2                  break;
+  56   2              case '3':
+  57   2                  printf("\r\n3 is pressed");
+  58   2                  break;
+  59   2              case '4':
+  60   2                  printf("\r\n4 is pressed");
+  61   2                  break;
+  62   2              default:
+  63   2                  printf("\r\nWrong key pressed");
+  64   2                  break;
+  65   2          }*/
+  66   2          //Timer0_Delay1ms(300);
+  67   2       }
+  68   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     56    ----
+   CONSTANT SIZE    =     20    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

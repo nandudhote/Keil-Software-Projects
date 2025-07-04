@@ -1,0 +1,6 @@
+".\Objects\STARTUP.obj",
+".\Objects\main.obj",
+".\Objects\Common.obj",
+".\Objects\Delay.obj" 
+TO ".\Objects\UART_Communication" 
+PRINT(".\Listings\UART_Communication.m51") RAMSIZE(256) 

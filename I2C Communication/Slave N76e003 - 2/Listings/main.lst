@@ -1,0 +1,319 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 11:08:55 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Nandkishor\Software\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(..\N76E003_BSP_Keil_C
+                    -51_V1.0.6;..\..\N76E003_BSP_Keil_C51_V1.0.6\N76E003_BSP_Keil_C51_V1.0.6\Include;..\..\N76E003_BSP_Keil_C51_V1.0.6\N76E00
+                    -3_BSP_Keil_C51_V1.0.6\Common) DEBUG OBJECTEXTEND PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "N76E003.h"
+   2          #include "Common.h"
+   3          #include "Delay.h"
+   4          #include "SFR_Macro.h"
+   5          #include "Function_define.h"
+   6          //#include "stdint.h" // for uint16_t
+   7          
+   8          
+   9          // i2c variable start //
+  10          #define I2C_CLOCK            13
+  11          #define EEPROM_SLA           0x15 
+  12          
+  13          void Init_I2C(void);
+  14          
+  15          unsigned char temp _at_ 0x08;
+  16          unsigned char idata itemp _at_ 0x80;
+  17          unsigned char xdata xtemp _at_ 0x80;
+  18          
+  19          uint8_t data_received[10];
+  20          uint8_t data_num = 0;
+  21          uint16_t finalADCAVG = 1234;
+  22          
+  23          volatile bit data_ready = 0;
+  24          uint8_t data_len = 0;
+  25          
+  26          // define string
+  27          uint8_t data_to_send[] = "HELLO Evoluzn India";
+  28          uint8_t send_index = 0;
+  29          uint8_t send_len = sizeof(data_to_send) - 1; // minus 1 to remove null terminator
+  30          
+  31          
+  32          uint8_t i;
+  33          
+  34          /*==========================================================================*/
+  35          void main (void) 
+  36          {
+  37   1           // char oper;   // Variable to store received character
+  38   1      
+  39   1           // Initialize UART0 using Timer1, baud rate 9600
+  40   1           InitialUART0_Timer3(9600);
+  41   1        
+  42   1           TI_1 = 1;
+  43   1           // Enable_ADC_AIN1;            // Enable AIN1 P3.0 as ADC input, Find in "Function_define.h" - "ADC INIT"
+  44   1        
+  45   1        /* Initial I2C function */
+  46   1           Init_I2C();                                 //initial I2C circuit
+  47   1      
+  48   1          /*while(1)
+  49   1          {
+  50   1            adcval = 0;
+  51   1            for(a=0; a<CTSampleSize; a++){
+  52   1              clr_ADCF;
+  53   1              set_ADCS;                 // ADC start trig signal
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 11:08:55 PAGE 2   
+
+  54   1              while(ADCF == 0);
+  55   1              adcval = ADCRH;
+  56   1              adcval = adcval << 4;
+  57   1              adcval |= (ADCRL & 0x0f);
+  58   1              CT[a] = adcval;
+  59   1              Timer0_Delay1ms(2);
+  60   1            }
+  61   1            adcAvg = (adcAvg + findMax(CT, CTSampleSize));
+  62   1            sampleCounter++;
+  63   1            if(sampleCounter >= avgSamples){
+  64   1              Timer0_Delay1ms(20);
+  65   1              sampleCounter = 0;
+  66   1              finalADCAVG = (uint16_t)adcAvg/avgSamples;
+  67   1              adcAvg = 0;
+  68   1            } 
+  69   1        }*/
+  70   1        
+  71   1        while (1)
+  72   1      {
+  73   2        
+  74   2        if (data_ready)
+  75   2          {
+  76   3              printf("\nReceived string: ");
+  77   3      
+  78   3              for (i=0; i<data_len; i++)
+  79   3              {
+  80   4                  printf("%c", data_received[i]);
+  81   4              }
+  82   3              printf("\n");
+  83   3      
+  84   3              data_ready = 0;   // clear flag
+  85   3          }
+  86   2      
+  87   2        
+  88   2          /*if (data_ready)
+  89   2          {
+  90   2              printf("\ndata received: %x", data_received[data_num - 1]);
+  91   2              data_ready = 0;
+  92   2          }*/
+  93   2      
+  94   2          //printf("\r\nPress 1 or Press 2 or Press 3 or Press 4");
+  95   2      
+  96   2         /* while (1)
+  97   2          {
+  98   2              oper = Receive_Data_From_UART0();
+  99   2      
+ 100   2              // skip \r and \n silently
+ 101   2              if (oper != '\r' && oper != '\n')
+ 102   2                  break;
+ 103   2          }
+ 104   2          
+ 105   2              // Print what was received
+ 106   2              printf("\r\nYou pressed: %c", oper);
+ 107   2          
+ 108   2          switch (oper)
+ 109   2          {
+ 110   2              case '1':
+ 111   2                  printf("\r\n1 is pressed");
+ 112   2                  break;
+ 113   2              case '2':
+ 114   2                  printf("\r\n2 is pressed");
+ 115   2                  break;
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 11:08:55 PAGE 3   
+
+ 116   2              case '3':
+ 117   2                  printf("\r\n3 is pressed");
+ 118   2                  break;
+ 119   2              case '4':
+ 120   2                  printf("\r\n4 is pressed");
+ 121   2                  break;
+ 122   2              default:
+ 123   2                  printf("\r\nWrong key pressed");
+ 124   2                  break;
+ 125   2          }*/
+ 126   2          Timer0_Delay1ms(300);
+ 127   2       }
+ 128   1      }
+ 129          
+ 130          
+ 131          void Init_I2C(void)
+ 132          {
+ 133   1          P13_Quasi_Mode;                         //set SCL (P13) is Quasi mode
+ 134   1          P14_Quasi_Mode;                         //set SDA (P14) is Quasi mode
+ 135   1          
+ 136   1          SDA = 1;                                //set SDA and SCL pins high
+ 137   1          SCL = 1;
+ 138   1          
+ 139   1          set_P0SR_6;                             //set SCL (P06) is  Schmitt triggered input select.
+ 140   1          
+ 141   1          set_EI2C;                               //enable I2C interrupt by setting IE1 bit 0
+ 142   1          set_EA;
+ 143   1      
+ 144   1          I2ADDR = EEPROM_SLA;                    //define own slave address
+ 145   1          set_I2CEN;                              //enable I2C circuit
+ 146   1          set_AA;
+ 147   1      }
+ 148          
+ 149          void I2C_ISR(void) interrupt 6
+ 150          {
+ 151   1        //printf("\n i2c interrupt happend %x", I2STAT);
+ 152   1          switch (I2STAT)
+ 153   1          {
+ 154   2              case 0x00:
+ 155   2                  STO = 1;
+ 156   2                  break;
+ 157   2      
+ 158   2              case 0x60:
+ 159   2                  AA = 1;
+ 160   2                  //P3 = 0x60;
+ 161   2                  //printf("\ncase 0x60");
+ 162   2                  //data_received[data_num] = I2DAT;
+ 163   2                  //printf("\ndata receive inb 0x60 : %x", data_received[data_num]);
+ 164   2                  break;
+ 165   2              
+ 166   2              case 0x68:
+ 167   2                  P02 = 0;
+ 168   2                  while(1);
+ 169   2                  break;
+ 170   2      
+ 171   2              case 0x80:
+ 172   2                  P3 = 0x80;
+ 173   2                  //printf("\ndata received\n");
+ 174   2                  //I2C_start();
+ 175   2                  //I2C_write_DATA(0x25);
+ 176   2                  //I2C_stop();
+ 177   2              
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 11:08:55 PAGE 4   
+
+ 178   2                  //data_received[data_num] = I2DAT;
+ 179   2                  //printf("\ndata receive in 0x80 : %x", data_received[data_num]);
+ 180   2              
+ 181   2                  //data_num++;
+ 182   2      
+ 183   2                  //if (data_num == 34)
+ 184   2                  //    AA = 0;
+ 185   2                  //else
+ 186   2                  //    AA = 1;
+ 187   2              
+ 188   2                    /*data_received[data_num] = I2DAT;
+ 189   2                    printf("\ndata received: %x", data_received[data_num - 1]);
+ 190   2                    data_num++;
+ 191   2                    //data_ready = 1;
+ 192   2                    AA = 1;*/
+ 193   2                    
+ 194   2                    data_received[data_num] = I2DAT;
+ 195   2                    data_num++;
+ 196   2                    if (data_num >= sizeof(data_received))
+ 197   2                    {
+ 198   3                       data_ready = 1;   // buffer full, process in main
+ 199   3                       data_num = 0;     // reset index for next string
+ 200   3                    }
+ 201   2                    AA = 1;               // acknowledge to continue receiving  
+ 202   2                  break;
+ 203   2      
+ 204   2              case 0x88:
+ 205   2                  //P3 = 0x88;
+ 206   2                  //data_received[data_num] = I2DAT;
+ 207   2                  //data_num = 0;
+ 208   2                  AA = 1;
+ 209   2                  break;
+ 210   2      
+ 211   2              case 0xA0:
+ 212   2                  //P3 = 0xA0;
+ 213   2                    data_len = data_num;    // store length of received string
+ 214   2                    data_ready = 1;         // flag main loop to process
+ 215   2                    data_num = 0;           // reset index
+ 216   2                  AA = 1;
+ 217   2                  break;
+ 218   2              
+ 219   2              case 0xA8:  // Master starts reading ? first byte
+ 220   2                 /*   send_index = 0;
+ 221   2                    I2DAT = data_to_send[send_index++];
+ 222   2                  AA = 1; // ACK, ready to send next
+ 223   2                  break;*/
+ 224   2              
+ 225   2                  printf("\nMaster started read, sending: %c", data_to_send[0]);
+ 226   2                  send_index = 0;
+ 227   2                  I2DAT = data_to_send[send_index++];
+ 228   2                  AA = 1;
+ 229   2                  break;
+ 230   2      
+ 231   2              case 0xB8:  // Master ACKed, send next byte
+ 232   2                   /* if (send_index < send_len)
+ 233   2                    {
+ 234   2                    I2DAT = data_to_send[send_index++];
+ 235   2                  AA = 1;
+ 236   2                    }
+ 237   2                    else
+ 238   2                    {
+ 239   2                  AA = 0; // no more data
+C51 COMPILER V9.60.0.0   MAIN                                                              07/04/2025 11:08:55 PAGE 5   
+
+ 240   2                    }
+ 241   2                  break;*/
+ 242   2              
+ 243   2                if (send_index < send_len) {
+ 244   3                printf("\nSending: %c", data_to_send[send_index]);
+ 245   3                I2DAT = data_to_send[send_index++];
+ 246   3                AA = 1;
+ 247   3                } else {
+ 248   3                printf("\nAll data sent");
+ 249   3                AA = 0;
+ 250   3                }
+ 251   2                break;
+ 252   2      
+ 253   2              case 0xC0:  // Master NACKed, stop
+ 254   2                  AA = 1;
+ 255   2                  break;
+ 256   2              
+ 257   2              
+ 258   2              /*case 0xA8:
+ 259   2                  I2DAT = finalADCAVG/100; // ((finalADCAVG & 0xff00)>>8);
+ 260   2                  clr_SI;
+ 261   2                  while (!SI);                            //Check SI set or not
+ 262   2                  I2DAT = finalADCAVG%100; // (finalADCAVG & 0x00ff);
+ 263   2                  // data_num++;
+ 264   2                  AA = 1;
+ 265   2                  break;
+ 266   2              
+ 267   2              case 0xB8:
+ 268   2                  //P3 = 0xB8;
+ 269   2                  //I2DAT = data_received[data_num];
+ 270   2                  //data_num++;
+ 271   2                  AA = 1;
+ 272   2                  break;
+ 273   2      
+ 274   2              case 0xC0:
+ 275   2                  AA = 1;
+ 276   2                  break;  */
+ 277   2      
+ 278   2              case 0xC8:
+ 279   2                  //P3 = 0xC8;
+ 280   2                  AA = 1;
+ 281   2                  break;        
+ 282   2          }
+ 283   1      
+ 284   1          SI = 0;
+ 285   1      //    while(STO);
+ 286   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    360    ----
+   CONSTANT SIZE    =     86    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     37    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

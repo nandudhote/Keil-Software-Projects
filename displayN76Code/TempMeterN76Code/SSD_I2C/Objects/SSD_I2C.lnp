@@ -1,0 +1,8 @@
+".\Objects\main.obj",
+".\Objects\SS_Display.obj",
+".\Objects\Common.obj",
+".\Objects\Delay.obj",
+".\Objects\STARTUP.obj" 
+TO ".\Objects\SSD_I2C" 
+PRINT(".\Listings\SSD_I2C.m51") RAMSIZE(256) 
+DISABLEWARNING (16) 
