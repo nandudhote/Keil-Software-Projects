@@ -1,0 +1,76 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/05/2025 12:01:01 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Nandkishor\Software\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(..\N76E003_BSP_Keil_C
+                    -51_V1.0.6;..\N76E003_BSP_Keil_C51_V1.0.6\N76E003_BSP_Keil_C51_V1.0.6\Common;..\N76E003_BSP_Keil_C51_V1.0.6\N76E003_BSP_K
+                    -eil_C51_V1.0.6\Include) DEBUG OBJECTEXTEND PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "N76E003.h"
+   2          #include "SFR_Macro.h"
+   3          #include "Function_define.h"
+   4          #include "Common.h"
+   5          #include "Delay.h"
+   6          
+   7          //==========================================================================
+   8          // MAIN FUNCTION
+   9          //==========================================================================
+  10          void main(void)
+  11          {
+  12   1          uint16_t adcval = 0;
+  13   1      
+  14   1          // Initialize UART0 using Timer3, baud rate 9600
+  15   1          InitialUART0_Timer3(9600);
+  16   1          TI = 1;  // Enable transmit interrupt flag before first printf
+  17   1      
+  18   1          Enable_ADC_AIN1;  // Enable ADC on pin P1.6 (AIN1)
+  19   1      
+  20   1          while (1)
+  21   1          {
+  22   2              char adcString[16];
+  23   2            
+  24   2              // Start ADC conversion
+  25   2              clr_ADCF;    // Clear ADC finish flag
+  26   2              set_ADCS;    // Start ADC
+  27   2              while (ADCF == 0);  // Wait until finish
+  28   2      
+  29   2              // Read ADC value For 12 bit
+  30   2              //adcval = ADCRH;
+  31   2              //adcval = adcval << 4;
+  32   2              //adcval |= (ADCRL & 0x0f);
+  33   2            
+  34   2              // Read ADC value (10-bit right-aligned)
+  35   2              adcval = ((ADCRH << 8) | ADCRL) & 0x03FF;  // Mask to keep only 10 bits
+  36   2      
+  37   2              // Print the ADC value
+  38   2              printf("ADC Value: %u\r\n", adcval);
+  39   2            
+  40   2             
+  41   2              sprintf(adcString, "%u", adcval);
+  42   2      
+  43   2              // Now you can print it:
+  44   2              printf("ADC String: %s\r\n", adcString);
+  45   2      
+  46   2      
+  47   2              Timer0_Delay1ms(1000);  // Delay 1 second
+  48   2          }
+  49   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    128    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              07/05/2025 12:01:01 PAGE 2   
+
+   CONSTANT SIZE    =     36    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      18
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
